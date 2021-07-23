@@ -4,6 +4,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import Login from './screens/Login';
 import { createStackNavigator } from '@react-navigation/stack';
+import Register from './screens/Register';
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,7 @@ export default function App() {
         }}
       >
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Register" component={Register} />
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView } from 'react-native';
 import { Button, Input, Image } from 'react-native-elements';
 
-const Login = () => {
+const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -33,7 +33,12 @@ const Login = () => {
         />
       </View>
       <Button containerStyle={styles.button} onPress={signIn} title="Login!" />
-      <Button containerStyle={styles.button} type="outline" title="Register?" />
+      <Button
+        containerStyle={styles.button}
+        onPress={() => navigation.navigate('Register')}
+        type="outline"
+        title="Register?"
+      />
       <View style={{ height: 100 }} />
     </KeyboardAvoidingView>
   );
