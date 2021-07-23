@@ -1,10 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView } from 'react-native';
 import { Button, Input, Image } from 'react-native-elements';
+import { auth } from '../lib/firebase';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        navigation.replace('Home');
+      }
+    });
+
+    return unsub;
+  }, []);
 
   const signIn = () => {};
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
 import { Button, Input, Text } from 'react-native-elements';
+import { auth } from '../lib/firebase';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -8,7 +9,13 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [avatar, setAvatar] = useState('');
 
-  const register = () => {};
+  const register = async () => {
+    const authUser = await auth.createUserWithEmailAndPassword(email, password);
+    await authUser.user.updateProfile({
+      displayName: name,
+      photoURL: avatar || '',
+    });
+  };
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
