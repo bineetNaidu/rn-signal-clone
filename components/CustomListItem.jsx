@@ -2,15 +2,17 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { ListItem, Avatar } from 'react-native-elements';
 
-const CustomListItem = () => {
+const CustomListItem = ({ id, chatName, enterChat }) => {
   return (
-    <ListItem>
+    <ListItem key={id} bottomDivider onPress={() => enterChat(id, chatName)}>
       <Avatar
         rounded
-        source={{ uri: 'https://facebook.github.io/react/img/logo_og.png' }}
+        source={{
+          uri: 'https://avatars3.githubusercontent.com/u/14058?s=460&v=4',
+        }}
       />
       <ListItem.Content>
-        <ListItem.Title style={styles.title}>Youtube Chat</ListItem.Title>
+        <ListItem.Title style={styles.title}>{chatName}</ListItem.Title>
         <ListItem.Subtitle
           style={styles.subtitle}
           numberOfLines={1}

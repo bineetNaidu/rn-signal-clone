@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   TouchableOpacity,
   StyleSheet,
@@ -8,10 +8,30 @@ import {
 } from 'react-native';
 import { Avatar } from 'react-native-elements';
 import CustomListItem from '../components/CustomListItem';
-import { auth } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
 import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 
 const Home = ({ navigation }) => {
+  const [chats, setChats] = useState([]);
+
+  useEffect(() => {
+    const unsub = db.collection('chats').onSnapshot((snapshot) => {
+      setChats(
+        snapshot.docs.map((d) => ({
+          id: d.id,
+          data: d.data(),
+        }))
+      );
+    });
+    return () => {
+      unsub();
+    };
+  }, []);
+
+  const enterChat = (id, chatName) => {
+    navigation.navigate('Chat', { id, chatName });
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: 'Signal',
@@ -53,8 +73,15 @@ const Home = ({ navigation }) => {
 
   return (
     <SafeAreaView>
-      <ScrollView>
-        <CustomListItem />
+      <ScrollView style={styles.container}>
+        {chats.map(({ id, data }) => (
+          <CustomListItem
+            key={id}
+            id={id}
+            chatName={data.chatName}
+            enterChat={enterChat}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -69,6 +96,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: 80,
+  },
+  container: {
+    height: '100%',
   },
 });
 
