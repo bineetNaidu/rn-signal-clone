@@ -9,12 +9,18 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [avatar, setAvatar] = useState('');
 
-  const register = async () => {
-    const authUser = await auth.createUserWithEmailAndPassword(email, password);
-    await authUser.user.updateProfile({
-      displayName: name,
-      photoURL: avatar || '',
-    });
+  const register = () => {
+    auth
+      .createUserWithEmailAndPassword(email, password)
+      .then((authUser) => {
+        authUser.user.updateProfile({
+          displayName: name,
+          photoURL: avatar ?? '',
+        });
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   };
 
   return (
