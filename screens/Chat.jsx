@@ -18,20 +18,45 @@ import { auth, db, timestamp } from '../lib/firebase';
 
 const Chat = ({ navigation, route }) => {
   const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     Keyboard.dismiss();
 
-    db.doc(route.params.id).collection('messages').add({
-      message: input,
-      timestamp,
-      displayName: auth.currentUser.displayName,
-      email: auth.currentUser.email,
-      photoURL: auth.currentUser.photoURL,
-    });
+    if (!input) return;
+
+    await db
+      .collection('chats')
+      .doc(route.params.id)
+      .collection('messages')
+      .add({
+        message: input,
+        timestamp,
+        displayName: auth.currentUser.displayName,
+        email: auth.currentUser.email,
+        photoURL: auth.currentUser.photoURL,
+      });
 
     setInput('');
   };
+
+  useLayoutEffect(() => {
+    const unsub = db
+      .collection('chats')
+      .doc(route.params.id)
+      .collection('messages')
+      .orderBy('timestamp', 'asc')
+      .onSnapshot((snapshot) => {
+        setMessages(
+          snapshot.docs.map((doc) => ({
+            data: doc.data(),
+            id: doc.id,
+          }))
+        );
+      });
+
+    return unsub;
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -44,7 +69,9 @@ const Chat = ({ navigation, route }) => {
             size={30}
             rounded
             source={{
-              uri: 'https://avatars3.githubusercontent.com/u/14058?s=460&v=4',
+              uri:
+                messages[messages.length - 1]?.data.photoURL ||
+                'https://avatars3.githubusercontent.com/u/14058?s=460&v=4',
             }}
           />
           <Text style={styles.headerName}>{route.params.chatName}</Text>
@@ -70,12 +97,10 @@ const Chat = ({ navigation, route }) => {
         </View>
       ),
     });
-  }, []);
+  }, [navigation, messages]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text>I am the CHAT SCREEN</Text>
-      <Text>{JSON.stringify(route.params, null, 2)}</Text>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.wrapper}
@@ -83,7 +108,50 @@ const Chat = ({ navigation, route }) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <>
-            <ScrollView>{/* The Chat! */}</ScrollView>
+            <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
+              {messages.map(({ id, data }) =>
+                data.email === auth.currentUser.email ? (
+                  <View key={id} style={styles.receiver}>
+                    <Avatar
+                      size={30}
+                      position="absolute"
+                      containerStyle={{
+                        position: 'absolute',
+                        bottom: -15,
+                        right: -5,
+                      }}
+                      bottom={-15}
+                      right={-5}
+                      rounded
+                      source={{
+                        uri: data.photoURL,
+                      }}
+                    />
+                    <Text style={styles.receiverText}>{data.message}</Text>
+                  </View>
+                ) : (
+                  <View key={id} style={styles.sender}>
+                    <Avatar
+                      size={30}
+                      rounded
+                      containerStyle={{
+                        position: 'absolute',
+                        bottom: -15,
+                        left: -5,
+                      }}
+                      position="absolute"
+                      bottom={-15}
+                      left={-5}
+                      source={{
+                        uri: data.photoURL,
+                      }}
+                    />
+                    <Text style={styles.senderText}>{data.message}</Text>
+                    <Text style={styles.senderName}>{data.displayName}</Text>
+                  </View>
+                )
+              )}
+            </ScrollView>
             <View style={styles.footer}>
               <TextInput
                 style={styles.input}
@@ -144,6 +212,44 @@ const styles = StyleSheet.create({
     color: 'grey',
     borderWidth: 1,
     borderRadius: 10,
+  },
+  receiver: {
+    position: 'relative',
+    alignSelf: 'flex-end',
+    width: 100,
+    padding: 15,
+    maxWidth: '80%',
+    marginBottom: 20,
+    marginRight: 15,
+    backgroundColor: '#ECECEC',
+    borderRadius: 20,
+  },
+  sender: {
+    position: 'relative',
+    alignSelf: 'flex-start',
+    width: 100,
+    padding: 15,
+    maxWidth: '80%',
+    margin: 15,
+    backgroundColor: '#2B86E6',
+    borderRadius: 20,
+  },
+  senderName: {
+    color: '#fff',
+    fontSize: 10,
+    paddingRight: 10,
+    left: 10,
+  },
+  senderText: {
+    color: '#fff',
+    fontWeight: '500',
+    marginLeft: 10,
+    marginBottom: 15,
+  },
+  receiverText: {
+    color: '#000',
+    fontWeight: '500',
+    marginLeft: 10,
   },
 });
 
