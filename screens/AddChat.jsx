@@ -38,7 +38,7 @@ const AddChat = ({ navigation }) => {
           <Icon name="wechat" type="antdesign" size={24} color="#000" />
         }
       />
-      <Button title="Create new Chat" onPress={createChat} />
+      <Button disabled={!input} title="Create new Chat" onPress={createChat} />
     </KeyboardAvoidingView>
   );
 };
