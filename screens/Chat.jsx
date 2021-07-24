@@ -14,12 +14,23 @@ import {
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { Avatar } from 'react-native-elements';
 import { TouchableWithoutFeedback } from 'react-native';
+import { auth, db, timestamp } from '../lib/firebase';
 
 const Chat = ({ navigation, route }) => {
   const [input, setInput] = useState('');
 
   const sendMessage = () => {
     Keyboard.dismiss();
+
+    db.doc(route.params.id).collection('messages').add({
+      message: input,
+      timestamp,
+      displayName: auth.currentUser.displayName,
+      email: auth.currentUser.email,
+      photoURL: auth.currentUser.photoURL,
+    });
+
+    setInput('');
   };
 
   useLayoutEffect(() => {
@@ -79,6 +90,7 @@ const Chat = ({ navigation, route }) => {
                 placeholder="Type your message here"
                 value={input}
                 onChangeText={(text) => setInput(text)}
+                onSubmitEditing={sendMessage}
               />
               <TouchableOpacity onPress={sendMessage} activeOpacity={0.5}>
                 <Ionicons name="send" size={24} color="#2B68E6" />
